@@ -1,4 +1,9 @@
 import { useState } from 'react'
+import './App.css'
+
+import Filter from './components/Filter'
+import PersonsForm from './components/PersonsForm'
+import Listings from './components/Listings'
 
 const App = () => {
   // State
@@ -9,7 +14,7 @@ const App = () => {
     { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
   ])
   const [newName, setNewName] = useState('')
-  const [newNumber, setNumber] = useState('')
+  const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
 
   // Filter persons by name or number
@@ -43,7 +48,7 @@ const App = () => {
 
     // Reset form
     setNewName('')
-    setNumber('')
+    setNewNumber('')
   }
 
   const handleNameChange = (event) => {
@@ -61,27 +66,16 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
-      filter by name or number: <input value={filter} onChange={handleFilterChange} />
+      <Filter filter={filter} onChange={handleFilterChange} />
       <h2>Add a new listing</h2>
-      <form onSubmit={addListing}>
-        <div>
-          name: <input value={newName} onChange={handleNameChange} />
-        </div>
-        <div>
-          number: <input value={newNumber} onChange={handleNumberChange} />
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
+      <PersonsForm
+        name={newName}
+        handleNameChange={handleNameChange}
+        number={newNumber}
+        handleNumberChange={handleNumberChange}
+        handleSubmit={addListing} />
       <h2>Numbers</h2>
-      <table>
-        <tbody>
-          {personsToShow.map(person => 
-            <Listing key={person.id} person={person} />
-          )}
-        </tbody>
-      </table>
+      <Listings persons={personsToShow} />
     </div>
   )
 }
