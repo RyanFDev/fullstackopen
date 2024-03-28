@@ -70,10 +70,10 @@ const App = () => {
       <h2>Add a new listing</h2>
       <PersonsForm
         name={newName}
-        handleNameChange={handleNameChange}
+        onNameChange={handleNameChange}
         number={newNumber}
-        handleNumberChange={handleNumberChange}
-        handleSubmit={addListing} />
+        onNumberChange={handleNumberChange}
+        onSubmit={addListing} />
       <h2>Numbers</h2>
       <Listings persons={personsToShow} />
     </div>
