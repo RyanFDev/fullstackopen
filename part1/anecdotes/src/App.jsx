@@ -24,7 +24,6 @@ const App = () => {
   
   // Function to generate a random index
   const randomIndex = (arr) => Math.floor(Math.random() * arr.length)
-  
   // Function to generate a random anecdote
   const randomAnecdote = (init) => {
     let newIndex = randomIndex(anecdotes);
