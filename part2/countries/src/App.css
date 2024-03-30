@@ -46,3 +46,22 @@
   margin: 0;
   list-style: none;
 }
+
+.weather-report h2 {
+  margin-bottom: 0;
+}
+
+.weather-report .weather-status span.stats {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.weather-report .weather-status b {
+  font-size: 0.8rem;
+  opacity: 0.5;
+}
+
+.country-list {
+  list-style: none;
+  padding: 0;
+}

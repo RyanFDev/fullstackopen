@@ -1,84 +1,39 @@
 import { useEffect, useState } from 'react';
 import countriesService from './services/countries';
+import weatherService from './services/weather';
 import './App.css';
 
-function Search({ value, onChange }) {
-  return (
-    <input
-      type="text"
-      className="search"
-      placeholder="Search for a country..."
-      value={value}
-      onChange={onChange}
-    />
-  );
-}
+import CountryDetails from './components/CountryDetails';
+import CountryList from './components/CountryList';
+import Search from './components/Search';
 
-function CountryList({ countries }) {
-  // Don't show list if there is only one country
-  if (countries.length === 1) {
+function WeatherReport({ weather, capital }) {
+  if (!weather || Object.keys(weather).length === 0) {
     return null;
   }
-  // No countries found
-  if (countries.length === 0) {
-    return <p>No countries found.</p>;
-  }
-  // Too many countries found
-  if (countries.length > 10) {
-    return <p>Too many matches, specify another filter</p>;
-  }
-  // Show list of countries
-  return (
-    <ul>
-      {countries.map((country) => (
-        <li key={country.cioc}>{country.name.common}</li>
-      ))}
-    </ul>
-  );
-}
 
-function CountryDetails({ country }) {
-  if (!country || Object.keys(country).length === 0) {
-    return null;
-  }
   return (
-    <div className="card">
-      <div className="country-details">
-        <div className="country-title">
-          <img
-            src={country.flags.png}
-            alt={`${country.name.common} Flag`}
-            className="flag"
-          />
-          <h2>{country.name.common}</h2>
-        </div>
-        <table>
-          <tbody>
-            <tr>
-              <td>Population:</td>
-              <td>{country.population}</td>
-            </tr>
-            <tr>
-              <td>Region:</td>
-              <td>{country.region}</td>
-            </tr>
-            <tr>
-              <td>Capital:</td>
-              <td>{country.capital}</td>
-            </tr>
-            <tr className="languages">
-              <td>Languages:</td>
-              <td>
-                <ul>
-                  {Object.values(country.languages).map((language) => (
-                    <li key={language}>{language}</li>
-                  ))}
-                </ul>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <div className="card weather-report">
+      <h2>Weather in {capital}</h2>
+      <div className="weather-status flex gap-sm">
+        <p className="flex-column">
+          <b>Temperature</b>
+          <span className="stats">{weather.main.temp}&deg;C</span>
+        </p>
+        <p className="flex-column">
+          <b>Wind</b>
+          <span className="stats flex gap-xs">
+            {weather.wind.speed} m/s
+            <div style={{ transform: `rotate(${weather.wind.deg}deg)` }}>
+              &#8607;
+            </div>
+          </span>
+        </p>
       </div>
+      <img
+        src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
+        alt={weather.weather[0].description}
+      />
     </div>
   );
 }
@@ -89,6 +44,7 @@ function App() {
   const [filteredCountries, setFilteredCountries] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [weather, setWeather] = useState(null);
 
   // Fetch data on component mount
   useEffect(() => {
@@ -121,22 +77,52 @@ function App() {
     }
   }, [countries, searchTerm]);
 
+  // Fetch weather data for selected country on selection
+  useEffect(() => {
+    if (!selectedCountry) {
+      return;
+    }
+    const [lat, lon] = selectedCountry.latlng;
+    weatherService
+      .getWeather(lat, lon)
+      .then((weather) => {
+        console.log('weather', weather);
+        setWeather(weather);
+      })
+      .catch((error) => {
+        alert(`Failed to fetch weather data: ${error.message}`);
+      });
+  }, [selectedCountry]);
+
+  // Countries have not been fetched yet
   if (countries.length === 0) {
     return <h1>Loading...</h1>;
   }
+  // Render app once countries loaded
   return (
     <>
       <h1>Country Lookup</h1>
+
       {/* Search Input */}
       <Search
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
+
       {/* Search Results */}
-      <CountryList countries={filteredCountries} />
+      <CountryList
+        countries={filteredCountries}
+        onSelect={setSearchTerm}
+      />
 
       {/* Country Details */}
       <CountryDetails country={selectedCountry} />
+
+      {/* Weather Report */}
+      <WeatherReport
+        weather={weather}
+        capital={selectedCountry.capital}
+      />
     </>
   );
 }

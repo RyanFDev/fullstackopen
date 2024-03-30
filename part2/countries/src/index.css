@@ -28,10 +28,14 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  max-width: 1280px;
+  max-width: 600px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+}
+
+#root {
+  flex: 1;
 }
 
 h1 {
@@ -75,6 +79,25 @@ input:focus {
   outline: none;
   box-shadow: none;
   border-color: rgb(100, 153, 255);
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gap-xs {
+  gap: 0.5rem;
+}
+.gap-sm {
+  gap: 1rem;
 }
 
 @media (prefers-color-scheme: light) {
