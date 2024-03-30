@@ -5,13 +5,25 @@ import './App.css';
 import Filter from './components/Filter';
 import PersonsForm from './components/PersonsForm';
 import Listings from './components/Listings';
+import Notification from './components/Notification';
 
+let notifyCounter = 0;
 const App = () => {
   // State
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
   const [filter, setFilter] = useState('');
+  const [notificationMessage, setNotificationMessage] = useState(null);
+
+  // Display a notification message, for a given duration
+  // message can be a string or object with text and type
+  const notify = (message, duration = 5000) => {
+    setNotificationMessage(message);
+    setTimeout(() => {
+      setNotificationMessage(null);
+    }, duration);
+  };
 
   // Fetch data
   useEffect(() => {
@@ -25,14 +37,7 @@ const App = () => {
       });
   }, []);
 
-  // Filter persons by name or number
-  const personsToShow = persons.filter((person) => {
-    return (
-      person.name.toLowerCase().includes(filter.toLowerCase()) ||
-      person.number.includes(filter)
-    );
-  });
-
+  // Add or update a listing in the phonebook
   const addListing = (event) => {
     event.preventDefault();
     // Validation
@@ -76,7 +81,7 @@ const App = () => {
       .create(person)
       .then((returnedPerson) => {
         setPersons(persons.concat(returnedPerson));
-
+        notify({ text: `Added ${returnedPerson.name}` });
         // Reset form
         setNewName('');
         setNewNumber('');
@@ -86,22 +91,8 @@ const App = () => {
       });
   };
 
-  const removeListing = (id) => {
-    const person = persons.find((person) => person.id === id);
-    if (window.confirm(`Delete ${person.name}?`)) {
-      personService
-        .remove(id)
-        .then(() => {
-          setPersons(persons.filter((person) => person.id !== id));
-        })
-        .catch((error) => {
-          alert(
-            `Unexpected error: ${JSON.stringify(error.response.data.error)}`
-          );
-        });
-    }
-  };
-
+  // Update a listing in the phonebook,
+  // called from addListing if person already exists
   const updateListing = (id, updatedPerson) => {
     personService
       .update(id, updatedPerson)
@@ -109,12 +100,75 @@ const App = () => {
         setPersons(
           persons.map((person) => (person.id !== id ? person : returnedPerson))
         );
+        notify({ text: `Updated ${returnedPerson.name}` });
       })
       .catch((error) => {
-        alert(`Unexpected error: ${JSON.stringify(error.response.data.error)}`);
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.error
+        ) {
+          notify({
+            text: `Unexpected error: ${JSON.stringify(
+              error.response.data.error
+            )}`,
+            type: 'error',
+          });
+        } else {
+          notify({
+            text: `${person} has already been removed.`,
+            type: 'error',
+          });
+        }
       });
   };
 
+  // Remove a listing from the phonebook
+
+  const removeListing = (id) => {
+    const person = persons.find((person) => person.id === id);
+    if (window.confirm(`Delete ${person.name}?`)) {
+      personService
+        .remove(id)
+        .then(() => {
+          setPersons(persons.filter((person) => person.id !== id));
+          notify({
+            text: `Deleted ${person.name}`,
+            type: 'error',
+          });
+        })
+        .catch((error) => {
+          if (
+            error.response &&
+            error.response.data &&
+            error.response.data.error
+          ) {
+            notify({
+              text: `Unexpected error: ${JSON.stringify(
+                error.response.data.error
+              )}`,
+              type: 'error',
+            });
+          } else {
+            notify({
+              text: `${person} has already been removed.`,
+              type: 'error',
+            });
+          }
+        });
+    }
+  };
+
+  /* Computed properties */
+  // Filter persons by name or number
+  const personsToShow = persons.filter((person) => {
+    return (
+      person.name.toLowerCase().includes(filter.toLowerCase()) ||
+      person.number.includes(filter)
+    );
+  });
+
+  /* Event handlers */
   const handleNameChange = (event) => {
     setNewName(event.target.value);
   };
@@ -130,6 +184,7 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification message={notificationMessage} />
       <Filter
         filter={filter}
         onChange={handleFilterChange}
