@@ -7,7 +7,6 @@ import PersonsForm from './components/PersonsForm';
 import Listings from './components/Listings';
 import Notification from './components/Notification';
 
-let notifyCounter = 0;
 const App = () => {
   // State
   const [persons, setPersons] = useState([]);
@@ -116,7 +115,7 @@ const App = () => {
           });
         } else {
           notify({
-            text: `${person} has already been removed.`,
+            text: `${updatedPerson.name} has already been removed.`,
             type: 'error',
           });
         }
