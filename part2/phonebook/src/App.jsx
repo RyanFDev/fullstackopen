@@ -32,7 +32,7 @@ const App = () => {
         setPersons(initialPersons);
       })
       .catch((error) => {
-        alert(`Unexpected error: ${JSON.stringify(error.response.data.error)}`);
+        notify({ text: error.response.data.error, type: 'error' });
       });
   }, []);
 
@@ -86,7 +86,7 @@ const App = () => {
         setNewNumber('');
       })
       .catch((error) => {
-        alert(`Unexpected error: ${JSON.stringify(error.response.data.error)}`);
+        notify({ text: error.response.data.error, type: 'error' });
       });
   };
 
@@ -108,9 +108,7 @@ const App = () => {
           error.response.data.error
         ) {
           notify({
-            text: `Unexpected error: ${JSON.stringify(
-              error.response.data.error
-            )}`,
+            text: error.response.data.error,
             type: 'error',
           });
         } else {
